@@ -21,7 +21,7 @@ node {
     stage("test"){
         // run maven tests here
         sh 'echo testing...'
-	docker run -i -v $PWD:/usr/src/mymaven -w /usr/src/mymaven --rm maven:3-jdk-8 mvn test
+	sh 'docker run -i -v $PWD:/usr/src/mymaven -w /usr/src/mymaven --rm maven:3-jdk-8 mvn test'
     }
     stage("publish"){
         //This publishes the commit if the tests have run without errors
