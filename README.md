@@ -1,4 +1,4 @@
-# Welcome
+# WELCOME
 
 This workshop have three different parts:
 
