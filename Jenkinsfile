@@ -24,7 +24,7 @@ node {
     }
     stage("artivvkts"){
       junit '**/target/surefire-reports/TEST-*.xml'
-      archive 'target/*.jar'
+      archiveArtifacts 'target/*.jar'
     }
     stage("publish"){
         //This publishes the commit if the tests have run without errors
