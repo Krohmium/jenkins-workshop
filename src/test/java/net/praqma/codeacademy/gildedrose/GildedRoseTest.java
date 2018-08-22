@@ -12,5 +12,6 @@ public class GildedRoseTest {
         GildedRose app = new GildedRose(items);
         app.updateQuality();
         assertEquals("1", "1");
+        assertEquals("12", "12");
     }
 }
