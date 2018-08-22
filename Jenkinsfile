@@ -18,10 +18,10 @@ node {
             userRemoteConfigs: [[credentialsId: 'krohmium-1', //remember to change credentials and url.
             url: 'git@github.com:Krohmium/jenkins-workshop.git']]])
     }
-    stage("test"){
+    stage("clean install"){
         // run maven tests here
         sh 'echo testing...'
-	sh 'docker run -i -v $PWD:/usr/src/mymaven -w /usr/src/mymaven --rm maven:3-jdk-8 mvn test'
+	sh 'docker run -i -v $PWD:/usr/src/mymaven -w /usr/src/mymaven --rm maven:3-jdk-8 mvn clean install'
     }
     stage("publish"){
         //This publishes the commit if the tests have run without errors
