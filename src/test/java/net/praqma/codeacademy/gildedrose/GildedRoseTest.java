@@ -13,5 +13,4 @@ public class GildedRoseTest {
         app.updateQuality();
         assertEquals("1", "1");
     }
-
 }
