@@ -1,4 +1,4 @@
-# Welc0me
+# Welc0me (we speak Docker now aswell)
 
 This workshop have three different parts:
 
