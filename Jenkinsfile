@@ -1,34 +1,44 @@
 
-/* 
-    This is the Pretested Integration Jenkinsfile
-    It enables the pretested workflow for this repository, and will automatically be picked up by Jenkins
-*/
 node {
-    stage("checkout") {
-        //Using the Pretested integration plugin to checkout out any branch in the ready namespace
-        checkout(
-            [$class: 'GitSCM', 
-            branches: [[name: '*/ready/**']], 
-            doGenerateSubmoduleConfigurations: false, 
-            extensions: [[$class: 'CleanBeforeCheckout'], 
-            pretestedIntegration(gitIntegrationStrategy: squash(), 
-            integrationBranch: 'master', 
-            repoName: 'origin')], 
-            submoduleCfg: [], 
-            userRemoteConfigs: [[credentialsId: 'krohmium-1', //remember to change credentials and url.
-            url: 'git@github.com:Krohmium/jenkins-workshop.git']]])
+  //cleanWs()
+
+    stage('Preparation') { // for display purposes
+        // Get some code from a GitHub repository
+
+    checkout([$class: 'GitSCM', branches: [[name: '*/ready/**']], 
+    doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout'], 
+    pretestedIntegration(gitIntegrationStrategy: accumulated(), integrationBranch: 'master', 
+    repoName: 'origin')], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'sofusalbertsen', 
+    url: 'git@github.com:sofusalbertsen/jenkins-workshop.git']]])
+    
+    stash name: "repo", includes: "**", useDefaultExcludes: false
     }
-    stage("clean install"){
-        // run maven tests here
-	sh 'docker run -i -u $(id -u):$(id -g) -v $PWD:/usr/src/mymaven -w /usr/src/mymaven --rm maven:3-jdk-8 mvn clean install'
+    
+    stage('Build') {
+        // Run the maven build
+        if (isUnix()) {
+           sh 'docker run -i -u "$(id -u):$(id -g)" -v maven-repo:/root/.m2 -v $PWD:/usr/src/mymaven -w /usr/src/mymaven --rm maven:3-jdk-8 mvn clean test install'
+            //sh "mvn -Dmaven.test.failure.ignore clean package"
+            stash name: "build-result", includes: "target/**"
+  
+        }
     }
-    stage("artivvkts"){
-      junit '**/target/surefire-reports/TEST-*.xml'
-      archiveArtifacts 'target/*.jar'
-    }
-    stage("publish"){
-        //This publishes the commit if the tests have run without errors
+    stage('Push'){
         pretestedIntegrationPublisher()
-	
+
+        deleteDir()
+    }
+  }
+  node {  
+    stage('Javadoc'){
+          unstash 'repo'
+          unstash 'build-result'
+
+          sh 'docker run -u "$(id -u):$(id -g)" -v maven-repo:/root/.m2 -v $PWD:/usr/src/mymaven -w /usr/src/mymaven --rm maven:3-jdk-8 mvn site'
+    }
+    stage('Results') {
+            junit '**/target/surefire-reports/TEST-*.xml'
+            archiveArtifacts 'target/*.jar'
+       
     }
 }
